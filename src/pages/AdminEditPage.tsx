@@ -45,8 +45,16 @@ export function AdminEditPage() {
         setNotFound(true)
         return
       }
-      const { id: _recordId, createdAt, updatedAt, createdBy, ...data } = record
-      setForm(data)
+      setForm({
+        data: record.data,
+        paciente: record.paciente,
+        medicoResponsavel: record.medicoResponsavel,
+        plantonista: record.plantonista,
+        cirurgia: record.cirurgia,
+        evolucao: record.evolucao,
+        conduta: record.conduta,
+        observacoes: record.observacoes,
+      })
     })
   }, [id])
 
