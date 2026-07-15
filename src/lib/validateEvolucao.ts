@@ -1,6 +1,6 @@
 import type { EvolucaoFormData } from "@/types/evolucao"
 
-const REQUIRED_FIELDS: Array<keyof EvolucaoFormData> = [
+const REQUIRED_FIELDS: Array<keyof Omit<EvolucaoFormData, "fotos">> = [
   "data",
   "paciente",
   "medicoResponsavel",

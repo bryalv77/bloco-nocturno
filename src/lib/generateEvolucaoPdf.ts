@@ -68,7 +68,8 @@ async function loadPhotoSlot(url: string): Promise<PhotoSlot | null> {
       }
     )
     return { dataUrl, ...dims }
-  } catch {
+  } catch (error) {
+    console.error(`Falha ao carregar foto para o PDF (${url}):`, error)
     return null
   }
 }
@@ -109,7 +110,7 @@ async function arrayBufferToBase64(buf: ArrayBuffer): Promise<string> {
 async function loadInterFonts(): Promise<Map<FontStyle, string>> {
   if (fontCache) return fontCache
   const results = await Promise.all(
-    FONT_WEIGHTS.map(async ({ style, file, url }) => {
+    FONT_WEIGHTS.map(async ({ style, url }) => {
       const res = await fetch(url)
       if (!res.ok) throw new Error(`Font fetch failed: ${res.status}`)
       const buf = await res.arrayBuffer()
@@ -343,7 +344,7 @@ class PdfCursor {
     this.doc.line(lineX, this.y, lineX + lineWidth, this.y)
     this.y += 4.5
 
-    this.setFont("regular", 8.5)
+    this.setFont("normal", 8.5)
     this.text(MUTED)
     this.doc.text(
       "Assinatura do plantonista",
