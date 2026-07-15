@@ -1,3 +1,5 @@
+export const MAX_EVOLUCAO_PHOTOS = 4
+
 export interface EvolucaoFormData {
   data: string
   paciente: string
@@ -7,6 +9,7 @@ export interface EvolucaoFormData {
   evolucao: string
   conduta: string
   observacoes: string
+  fotos: string[]
 }
 
 export interface EvolucaoRecord extends EvolucaoFormData {
@@ -20,9 +23,10 @@ export const EMPTY_EVOLUCAO_FORM: EvolucaoFormData = {
   data: "",
   paciente: "",
   medicoResponsavel: "",
-  plantonista: "Dra. Alba Paredes",
+  plantonista: "",
   cirurgia: "",
   evolucao: "",
   conduta: "",
   observacoes: "",
+  fotos: [],
 }

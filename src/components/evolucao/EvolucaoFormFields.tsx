@@ -1,5 +1,15 @@
-import type { EvolucaoFormData } from "@/types/evolucao"
+import * as React from "react"
+import { format } from "date-fns"
+import { ptBR } from "date-fns/locale"
+import { CalendarIcon } from "lucide-react"
 
+import { useDoctores } from "@/hooks/useDoctores"
+import { MAX_EVOLUCAO_PHOTOS, type EvolucaoFormData } from "@/types/evolucao"
+import type { PhotoEntry } from "@/lib/evolucaoPhotos"
+
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
 import {
   Field,
   FieldContent,
@@ -8,7 +18,14 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { Textarea } from "@/components/ui/textarea"
+import { DoctorCombobox } from "@/components/evolucao/DoctorCombobox"
+import { EvolucaoPhotosField } from "@/components/evolucao/EvolucaoPhotosField"
 
 interface EvolucaoFormFieldsProps {
   form: EvolucaoFormData
@@ -17,25 +34,86 @@ interface EvolucaoFormFieldsProps {
     field: K,
     value: EvolucaoFormData[K]
   ) => void
+  photos: PhotoEntry[]
+  onAddPhotos: (files: File[]) => void
+  onRemovePhoto: (id: string) => void
+  onRetryPhoto: (id: string) => void
+  photosDisabled?: boolean
+}
+
+function isoDateToDate(iso: string): Date | undefined {
+  if (!iso) return undefined
+  const [year, month, day] = iso.split("-").map(Number)
+  if (!year || !month || !day) return undefined
+  return new Date(year, month - 1, day)
+}
+
+function dateToIsoDate(date: Date | undefined): string {
+  if (!date) return ""
+  const yyyy = date.getFullYear()
+  const mm = String(date.getMonth() + 1).padStart(2, "0")
+  const dd = String(date.getDate()).padStart(2, "0")
+  return `${yyyy}-${mm}-${dd}`
 }
 
 export function EvolucaoFormFields({
   form,
   errors,
   onChange,
+  photos,
+  onAddPhotos,
+  onRemovePhoto,
+  onRetryPhoto,
+  photosDisabled = false,
 }: EvolucaoFormFieldsProps) {
+  const selectedDate = React.useMemo(
+    () => isoDateToDate(form.data),
+    [form.data]
+  )
+  const doctors = useDoctores()
+
   return (
     <FieldGroup>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field data-invalid={!!errors.data}>
           <FieldLabel htmlFor="data">Data</FieldLabel>
           <FieldContent>
-            <Input
-              id="data"
-              type="date"
-              value={form.data}
-              onChange={(event) => onChange("data", event.target.value)}
-            />
+            <Popover>
+              <PopoverTrigger
+                render={(props) => (
+                  <Button
+                    {...props}
+                    id="data"
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !form.data && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="size-4" />
+                    {form.data ? (
+                      format(selectedDate ?? new Date(), "PPP", {
+                        locale: ptBR,
+                      })
+                    ) : (
+                      <span>Selecione uma data</span>
+                    )}
+                  </Button>
+                )}
+              />
+              <PopoverContent
+                className="w-auto p-0"
+                align="start"
+              >
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={(date) => onChange("data", dateToIsoDate(date))}
+                  locale={ptBR}
+                  autoFocus
+                />
+              </PopoverContent>
+            </Popover>
             <FieldError>{errors.data}</FieldError>
           </FieldContent>
         </Field>
@@ -58,13 +136,13 @@ export function EvolucaoFormFields({
             Médico Responsável
           </FieldLabel>
           <FieldContent>
-            <Input
+            <DoctorCombobox
               id="medicoResponsavel"
               value={form.medicoResponsavel}
-              onChange={(event) =>
-                onChange("medicoResponsavel", event.target.value)
-              }
-              placeholder="Dr(a). Nome"
+              onChange={(value) => onChange("medicoResponsavel", value)}
+              doctors={doctors}
+              placeholder="Selecione ou digite um nome"
+              aria-invalid={!!errors.medicoResponsavel}
             />
             <FieldError>{errors.medicoResponsavel}</FieldError>
           </FieldContent>
@@ -73,12 +151,13 @@ export function EvolucaoFormFields({
         <Field data-invalid={!!errors.plantonista}>
           <FieldLabel htmlFor="plantonista">Plantonista</FieldLabel>
           <FieldContent>
-            <Input
+            <DoctorCombobox
               id="plantonista"
               value={form.plantonista}
-              onChange={(event) =>
-                onChange("plantonista", event.target.value)
-              }
+              onChange={(value) => onChange("plantonista", value)}
+              doctors={doctors}
+              placeholder="Selecione ou digite um nome"
+              aria-invalid={!!errors.plantonista}
             />
             <FieldError>{errors.plantonista}</FieldError>
           </FieldContent>
@@ -137,6 +216,15 @@ export function EvolucaoFormFields({
           />
         </FieldContent>
       </Field>
+
+      <EvolucaoPhotosField
+        entries={photos}
+        maxPhotos={MAX_EVOLUCAO_PHOTOS}
+        disabled={photosDisabled}
+        onAdd={onAddPhotos}
+        onRemove={onRemovePhoto}
+        onRetry={onRetryPhoto}
+      />
     </FieldGroup>
   )
 }

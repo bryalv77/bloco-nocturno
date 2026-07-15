@@ -38,6 +38,7 @@ function formatDisplayDate(isoDate: string): string {
 export function AdminListPage() {
   const [records, setRecords] = React.useState<EvolucaoRecord[] | null>(null)
   const [deletingId, setDeletingId] = React.useState<string | null>(null)
+  const [generatingId, setGeneratingId] = React.useState<string | null>(null)
 
   React.useEffect(() => {
     return subscribeEvolucoes(setRecords)
@@ -55,15 +56,35 @@ export function AdminListPage() {
     }
   }
 
+  async function handleDownload(record: EvolucaoRecord) {
+    setGeneratingId(record.id)
+    try {
+      await downloadEvolucaoPdf(record)
+    } catch {
+      toast.error("Não foi possível gerar o PDF. Tente novamente.")
+    } finally {
+      setGeneratingId(null)
+    }
+  }
+
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
       <div className="mb-6 flex items-center justify-between gap-4">
         <h1 className="text-xl font-medium text-foreground">
           Evoluções registradas
         </h1>
-        <Button size="sm" render={<Link to="/" />}>
-          Nova evolução
-        </Button>
+        <div className="flex gap-2 flex-col sm:flex-row">
+          <Button
+            size="sm"
+            variant="outline"
+            render={<Link to="/admin/doctores" />}
+          >
+            Gerenciar médicos
+          </Button>
+          <Button size="sm" render={<Link to="/" />}>
+            Nova evolução
+          </Button>
+        </div>
       </div>
 
       {records === null ? (
@@ -104,9 +125,14 @@ export function AdminListPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => downloadEvolucaoPdf(record)}
+                      onClick={() => handleDownload(record)}
+                      disabled={generatingId === record.id}
                     >
-                      PDF
+                      {generatingId === record.id ? (
+                        <Spinner className="size-4" />
+                      ) : (
+                        "PDF"
+                      )}
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger

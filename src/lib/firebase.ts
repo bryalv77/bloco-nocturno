@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app"
 import { getAuth } from "firebase/auth"
 import { getDatabase } from "firebase/database"
+import { getStorage } from "firebase/storage"
 import { isSupported, getAnalytics } from "firebase/analytics"
 
 const firebaseConfig = {
@@ -17,6 +18,7 @@ const firebaseConfig = {
 export const firebaseApp = initializeApp(firebaseConfig)
 export const auth = getAuth(firebaseApp)
 export const database = getDatabase(firebaseApp)
+export const storage = getStorage(firebaseApp)
 
 isSupported()
   .then((supported) => {

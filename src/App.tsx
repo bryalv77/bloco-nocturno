@@ -6,6 +6,7 @@ import { EvolucaoFormPage } from "@/pages/EvolucaoFormPage"
 import { LoginPage } from "@/pages/LoginPage"
 import { AdminListPage } from "@/pages/AdminListPage"
 import { AdminEditPage } from "@/pages/AdminEditPage"
+import { DoctoresAdminPage } from "@/pages/DoctoresAdminPage"
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/admin" element={<AdminListPage />} />
             <Route path="/admin/:id" element={<AdminEditPage />} />
+            <Route path="/admin/doctores" element={<DoctoresAdminPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

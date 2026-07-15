@@ -23,6 +23,13 @@ export function AppHeader() {
             <Button variant="ghost" size="sm" render={<Link to="/admin" />}>
               Registros
             </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              render={<Link to="/admin/doctores" />}
+            >
+              Médicos
+            </Button>
             <Button variant="outline" size="sm" onClick={handleLogout}>
               Sair
             </Button>
